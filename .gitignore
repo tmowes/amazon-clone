@@ -11,6 +11,8 @@
 # next.js
 /.next/
 /out/
+/out/*
+/.firebase
 
 # production
 /build
@@ -32,3 +34,5 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+/src/firebase.js
