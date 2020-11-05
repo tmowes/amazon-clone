@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
 import { getBasketTotal } from '~/hooks/reducer'
 import { useStateValue } from '~/hooks/StateProvider'
@@ -5,6 +6,7 @@ import { formatCurrency } from '~/utils'
 import { Container, Gift, Proceed, Title, Total } from './styles'
 
 const SubTotal: React.FC = () => {
+  const { push } = useRouter()
   const [{ basket }] = useStateValue()
 
   const formattedCurrency = useMemo(() => {
@@ -21,7 +23,7 @@ const SubTotal: React.FC = () => {
         <input type="checkbox" />
         This order contains a gift
       </Gift>
-      <Proceed>Proceed to Checkout</Proceed>
+      <Proceed onClick={() => push('/payment')}>Proceed to Checkout</Proceed>
     </Container>
   )
 }

@@ -13,6 +13,7 @@ const dark = {
     transparent: 'transparent',
     header: '#131921',
     amazon: '#cd9042',
+    amazonHover: '#bd8e18',
     amazonBG: '#eaeded',
     trueWhite: '#FFFFFF',
   },
