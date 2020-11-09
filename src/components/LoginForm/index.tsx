@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { FormEvent, useCallback, useState } from 'react'
-import { auth } from '~/firebase.js'
+import { auth } from '~/firebase'
 import {
   Container,
   Content,

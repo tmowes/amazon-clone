@@ -17,18 +17,17 @@ const app = express()
 app.use(cors({ origin: true }))
 app.use(express.json())
 
-app.get('/', (_, response) => response.status(200).send('OK'))
+app.get('/', (_, response) => response.status(200).send('OK-05-11'))
 
 app.post('/payment/create', async (request, response) => {
   const { total } = request.query
-
-  console.log('Payment Request Receive >>>>>>>', total)
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: Number(total),
     currency: 'brl',
   })
-  response.status(201).send({
+
+  return response.status(201).send({
     clientSecret: paymentIntent.client_secret,
   })
 })

@@ -2,7 +2,14 @@
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  FormEventHandler,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import { db } from '~/firebase'
 import { getBasketTotal } from '~/hooks/reducer'
 import { useStateValue } from '~/hooks/StateProvider'
 import { Product } from '~/hooks/types'
@@ -12,6 +19,7 @@ import CheckoutProduct from '../Checkout/CheckoutProduct'
 import {
   Address,
   AddressContent,
+  CARD_OPTIONS,
   CheckoutTitle,
   Container,
   Content,
@@ -25,7 +33,7 @@ import {
 
 const PaymentForm: React.FC = () => {
   const { replace } = useRouter()
-  const [{ basket, user }] = useStateValue()
+  const [{ basket, user }, dispatch] = useStateValue()
   const stripe = useStripe()
   const elements = useElements()
 
@@ -35,21 +43,10 @@ const PaymentForm: React.FC = () => {
   const [processing, setProcessing] = useState(false)
   const [clientSecret, setClientSecret] = useState<string>()
 
-  // useEffect(() => {
-  //   const getClientSecret = async () => {
-  //     const { data } = await api({
-  //       method: 'POST',
-  //       url: `/payment/create?total=${getBasketTotal(basket) * 100}`,
-  //     })
-  //     setClientSecret(data.clientSecret)
-  //   }
-  //   getClientSecret()
-  // }, [basket])
-
   useEffect(() => {
     const getClientSecret = async () => {
       const { data } = await api.post(
-        `/payment/create?total=${getBasketTotal(basket) * 100}`,
+        `/payment/create?total=${Math.round(getBasketTotal(basket) * 100)}`,
       )
       setClientSecret(data.clientSecret)
     }
@@ -60,37 +57,46 @@ const PaymentForm: React.FC = () => {
     return formatCurrency(getBasketTotal(basket))
   }, [basket])
 
-  console.log('clientSecret', clientSecret)
-
-  const paymentSubmit = useCallback(async (e: FormEvent) => {
+  const paymentSubmit: FormEventHandler<HTMLFormElement> = async e => {
     e.preventDefault()
     setProcessing(true)
-    if (stripe && elements && clientSecret) {
-      const payload = await stripe
-        .confirmCardPayment(clientSecret, {
-          payment_method: {
-            card: elements.getElement(CardElement),
-          },
+    const cardElement = elements!.getElement(CardElement)
+    if (stripe && clientSecret && cardElement) {
+      const {
+        error: paymentError,
+        paymentIntent,
+      } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement!,
+        },
+      })
+      if (paymentError) {
+        setError(paymentError.message ?? 'An unknown error occurred')
+      } else if (paymentIntent) {
+        db.collection('users')
+          .doc(user?.uid)
+          .collection('orders')
+          .doc(paymentIntent.id)
+          .set({
+            basket,
+            amount: paymentIntent.amount,
+            created: paymentIntent.created,
+          })
+        setSucceeded(true)
+        setError('')
+        setProcessing(false)
+        dispatch({
+          type: 'EMPTY_BASKET',
         })
-        .then(({ paymentIntent }) => {
-          if (paymentIntent) {
-            setSucceeded(true)
-            setError('')
-            setProcessing(false)
-            replace('/orders')
-          }
-        })
-      console.log('payload', payload)
+        replace('/orders')
+      }
     }
-  }, [])
+  }
 
-  const paymentChange = useCallback(
-    (event: any) => {
-      setDisabled(event.empty)
-      setError(event.error ? event.error.message : '')
-    },
-    [disabled, error],
-  )
+  const paymentChange = useCallback((event: any) => {
+    setDisabled(event.empty)
+    setError(event.error ? event.error.message : '')
+  }, [])
 
   return (
     <Container>
@@ -102,7 +108,7 @@ const PaymentForm: React.FC = () => {
         <Section>
           <Title>Delivery Address</Title>
           <AddressContent>
-            <Address>{user}</Address>
+            <Address>{user?.email}</Address>
             <Address>394, Botuverá</Address>
             <Address>Houston, TX</Address>
           </AddressContent>
@@ -119,7 +125,7 @@ const PaymentForm: React.FC = () => {
           <Title>Payment Methods</Title>
           <PaymentDetails>
             <form onSubmit={paymentSubmit}>
-              <CardElement onChange={paymentChange} />
+              <CardElement options={CARD_OPTIONS} onChange={paymentChange} />
               <PriceContainer>
                 {`Order Total: ${formattedCurrency} `}
               </PriceContainer>
@@ -127,10 +133,9 @@ const PaymentForm: React.FC = () => {
                 type="submit"
                 disabled={processing || disabled || succeeded}
               >
-                Pay
+                <span>{processing ? <p>Processing</p> : 'Buy Now'}</span>
               </PayButton>
               {error && <p>{error}</p>}
-              {clientSecret && <p>{clientSecret}</p>}
             </form>
           </PaymentDetails>
         </Section>

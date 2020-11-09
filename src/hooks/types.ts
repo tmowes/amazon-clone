@@ -14,21 +14,29 @@ export interface Product {
 
 export type ActionsProps =
   | {
-    type: 'ADD_TO_BASKET'
-    item: Product
-  }
+      type: 'ADD_TO_BASKET'
+      item: Product
+    }
   | {
-    type: 'REMOVE_FROM_BASKET'
-    id: number
-  }
+      type: 'REMOVE_FROM_BASKET'
+      id: number
+    }
   | {
-    type: 'SET_USER'
-    user: string | null
-  }
+      type: 'SET_USER'
+      user: UserProps | null
+    }
+  | {
+      type: 'EMPTY_BASKET'
+    }
+
+export interface UserProps {
+  email: string
+  uid: string
+}
 
 export interface StateProps {
   basket: Product[]
-  user: string | null
+  user: UserProps | null
 }
 
 export interface ContextProps {

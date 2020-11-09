@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import React, { useCallback, useMemo } from 'react'
-import { auth } from '~/firebase.js'
+import { auth } from '~/firebase'
 import { useStateValue } from '~/hooks/StateProvider'
 import navOptionsData from './navOptionsData'
 import {
@@ -40,7 +40,7 @@ const NavBar: React.FC = () => {
     if (!user) {
       return 'Hello guest'
     }
-    return `Hello ${user}`
+    return `Hello ${user.email}`
   }, [user])
 
   return (

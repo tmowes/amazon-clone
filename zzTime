@@ -1,3 +1,9 @@
 https://www.youtube.com/watch?v=RDV3Z1KCBvo&ab_channel=CleverProgrammer
 
 6:33:50
+
+style="background: linear-gradient(to right, rgb(239, 108, 0), rgb(251, 140, 0));"
+
+    --fire-color-amber-800: #ff8f00;
+    --fire-color-orange-900: #e65100;
+    --fire-color-red-600: #e53935;

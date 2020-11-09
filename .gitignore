@@ -35,4 +35,4 @@ yarn-error.log*
 # vercel
 .vercel
 
-/src/firebase.js
+/src/firebase.ts

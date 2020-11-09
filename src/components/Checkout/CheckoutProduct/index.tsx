@@ -15,7 +15,7 @@ import {
 } from './styles'
 import { CheckoutProductProps } from './types'
 
-const CheckoutProduct = ({ product }: CheckoutProductProps) => {
+const CheckoutProduct = ({ hiddenButton, product }: CheckoutProductProps) => {
   const [, dispatch] = useStateValue()
 
   const { id, code, title, price, rating, image, alt } = product
@@ -52,9 +52,11 @@ const CheckoutProduct = ({ product }: CheckoutProductProps) => {
               ))}
             </Rating>
           </SubInfo>
-          <RemoveFromBasket onClick={removeFromBasket}>
-            Remove from Basket
-          </RemoveFromBasket>
+          {!hiddenButton && (
+            <RemoveFromBasket onClick={removeFromBasket}>
+              Remove from Basket
+            </RemoveFromBasket>
+          )}
         </Info>
       </Content>
     </Container>

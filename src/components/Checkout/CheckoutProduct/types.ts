@@ -9,4 +9,5 @@ export interface CheckoutProductProps {
     alt: string
     location: string
   }
+  hiddenButton?: boolean
 }
